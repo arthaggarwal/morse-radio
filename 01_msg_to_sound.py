@@ -64,7 +64,7 @@ alphabet_to_morse = {
     "" : ""
 }
 
-morse_to_alphabet = {v: k for k, v in alphabet_to_morse.iteritems()}
+morse_to_alphabet = {v: k for k, v in alphabet_to_morse.items()}
 
 def removeunusablecharacters(uncorrected_string):
     return filter(lambda char: char in alphabet_to_morse, uncorrected_string.upper())
@@ -72,7 +72,7 @@ def removeunusablecharacters(uncorrected_string):
 def encode(decoded):
     morsestring = []
 
-    decoded = removeunusablecharacters(decoded)
+    decoded = "".join(removeunusablecharacters(decoded))
     decoded = decoded.upper()
     words = decoded.split(" ")
     for word in words:
@@ -131,17 +131,27 @@ def morse_to_wav(morse_code, output_file):
         elif symbol == "-":
             audio.extend(generate_tone(DASH_DURATION))
         elif symbol == " ":
-            audio.extend(generate_silence(SILENCE_DURATION * 7)) 
+            # Add 7 units of silence for word spacing
+            audio.extend(generate_silence(SILENCE_DURATION * 7))
         elif symbol == "/":
-            audio.extend(generate_silence(SILENCE_DURATION * 3))  
-        audio.extend(generate_silence(SILENCE_DURATION)) 
+            # Add 3 units of silence for letter spacing
+            audio.extend(generate_silence(SILENCE_DURATION * 3))
+        audio.extend(generate_silence(SILENCE_DURATION))  # Add 1 unit of silence after each dot/dash
 
     audio = np.array(audio, dtype=np.int16)
 
-    # create the wav file
+    # Create the wav file
     with wave.open(output_file, "w") as wav_file:
-        wav_file.setnchannels(1)  
-        wav_file.setsampwidth(2) 
+        wav_file.setnchannels(1)  # Mono
+        wav_file.setsampwidth(2)  # 16-bit audio
         wav_file.setframerate(SAMPLE_RATE)
         wav_file.writeframes(audio.tobytes())
+        
+message = "  ALL GOOD  "
+    
+morse_code = encode(message)
+print(f"Encoded Morse Code: {morse_code}")
 
+output_file = "02_sound.wav"
+morse_to_wav(morse_code, output_file)
+print(f"WAV file '{output_file}' created successfully.")
