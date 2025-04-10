@@ -151,6 +151,25 @@ def plot_signal(audio, sample_rate):
     plt.grid()
     plt.savefig("03 Transmitted sound envelope.png")
     
-# plot period still left sdsd
+def plot_period(audio, sample_rate, pulse_duration=DOT_DURATION):
+    offset_time = 2.0 
+    start_sample = int(offset_time * sample_rate)
+    end_sample = int((offset_time + pulse_duration) * sample_rate)
 
+    zoomed_audio = audio[start_sample:end_sample]
+    time = np.linspace(offset_time, offset_time + pulse_duration, len(zoomed_audio))
+
+    plt.figure(figsize=(10, 4))
+    plt.plot(time, zoomed_audio)
+    plt.xlabel("time / s")
+    plt.ylabel("signal / arbitrary units")
+
+    plt.xlim([time[0], time[-1]])
+    plt.ylim([-30000, 30000]) 
+
+    plt.grid(True)
+    plt.savefig("04 Received sound period.png")
+
+    
+plot_period(audio, SAMPLE_RATE)
 plot_signal(audio, SAMPLE_RATE)
