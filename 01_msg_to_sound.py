@@ -1,5 +1,7 @@
 import wave
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 
 alphabet_to_morse = {
@@ -66,13 +68,10 @@ alphabet_to_morse = {
 
 morse_to_alphabet = {v: k for k, v in alphabet_to_morse.items()}
 
-def removeunusablecharacters(uncorrected_string):
-    return filter(lambda char: char in alphabet_to_morse, uncorrected_string.upper())
 
 def encode(decoded):
     morsestring = []
 
-    decoded = "".join(removeunusablecharacters(decoded))
     decoded = decoded.upper()
     words = decoded.split(" ")
     for word in words:
@@ -88,22 +87,6 @@ def encode(decoded):
 
     return " ".join(morsestring)
 
-def decode(encoded):
-    characterstring = []
-
-    words = encoded.split(" ")
-    for word in words:
-        letters = word.split("/")
-
-        characterword = []
-        for letter in letters:
-            characterletter = morse_to_alphabet[letter]
-            characterword.append(characterletter)
-
-        word = "".join(characterword)
-        characterstring.append(word)
-
-    return " ".join(characterstring)
 
 # Constants for morse code sound
 DOT_DURATION = 0.1  # in seconds
@@ -131,27 +114,43 @@ def morse_to_wav(morse_code, output_file):
         elif symbol == "-":
             audio.extend(generate_tone(DASH_DURATION))
         elif symbol == " ":
-            # Add 7 units of silence for word spacing
             audio.extend(generate_silence(SILENCE_DURATION * 7))
         elif symbol == "/":
-            # Add 3 units of silence for letter spacing
             audio.extend(generate_silence(SILENCE_DURATION * 3))
-        audio.extend(generate_silence(SILENCE_DURATION))  # Add 1 unit of silence after each dot/dash
+        audio.extend(generate_silence(SILENCE_DURATION))  
 
     audio = np.array(audio, dtype=np.int16)
 
-    # Create the wav file
     with wave.open(output_file, "w") as wav_file:
-        wav_file.setnchannels(1)  # Mono
-        wav_file.setsampwidth(2)  # 16-bit audio
+        wav_file.setnchannels(1)  
+        wav_file.setsampwidth(2) 
         wav_file.setframerate(SAMPLE_RATE)
         wav_file.writeframes(audio.tobytes())
-        
-message = "  ALL GOOD  "
-    
-morse_code = encode(message)
-print(f"Encoded Morse Code: {morse_code}")
 
+    return audio
+
+
+# creating the wav file with the msg        
+message = "  ALL GOOD  "
+morse_code = encode(message)
 output_file = "02_sound.wav"
-morse_to_wav(morse_code, output_file)
-print(f"WAV file '{output_file}' created successfully.")
+audio = morse_to_wav(morse_code, output_file) # for l8r use
+
+def plot_signal(audio, sample_rate):
+    time = np.linspace(0, len(audio) / sample_rate, num=len(audio))
+
+    plt.figure(figsize=(10, 4))
+    plt.plot(time, audio)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Signal (arbitrary units)")
+
+    plt.xlim([0, len(audio) / sample_rate])  
+    plt.ylim([-AMPLITUDE, AMPLITUDE])      
+
+    plt.legend()
+    plt.grid()
+    plt.savefig("03 Transmitted sound envelope.png")
+    
+# plot period still left 
+
+plot_signal(audio, SAMPLE_RATE)
