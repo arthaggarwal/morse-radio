@@ -151,6 +151,6 @@ def plot_signal(audio, sample_rate):
     plt.grid()
     plt.savefig("03 Transmitted sound envelope.png")
     
-# plot period still left 
+# plot period still left sdsd
 
 plot_signal(audio, SAMPLE_RATE)
